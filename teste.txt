@@ -1,0 +1,5 @@
+int main(int n){
+    int m;
+    m = 54;
+    printf(82.5); 
+}
