@@ -15,12 +15,11 @@ static int emitLoc = 0;
    For use in conjunction with emitSkip,
    emitBackup, and emitRestore */
 static int highEmitLoc = 0;
-
 %}
 
 %union{
-	int inteiro;
-    float flutuante;
+	int Uinteiro;
+    float Uflutuante;
 }
 
 %token LEITURA
@@ -28,69 +27,67 @@ static int highEmitLoc = 0;
 %token WHILE
 %token COMENTARIO
 %token TYPEINT
-%token <flutuante> FLOAT
-%token <inteiro> INT
+%token <Uflutuante> FLOAT
+%token <Uinteiro> INT
 %token ID
 %%
-programa: declaracao_lista {printf("Rodando programa\n");}
+programa:           declaracao_lista
+                    { printf("Rodando programa\n"); }
 ;
-declaracao_lista:   declaracao_lista declaracao     {;}
-                    | declaracao                    {;}
+declaracao_lista:   declaracao_lista declaracao                         {;}
+                    | declaracao                                        {;}
 ;
-declaracao:         var_declaracao                  {;}
-                    | fun_declaracao                {;}
+declaracao:         var_declaracao                                      {;}
+                    | fun_declaracao                                    {;}
 ;
-var_declaracao:     tipo_especificador ID ';'       {printf("var declaracao\n");}
+var_declaracao:     tipo_especificador ID ';'
+                    { printf("var declaracao\n"); }
 ;
-fun_declaracao:     tipo_especificador ID '(' params ')' escopo_stmt {;}
+fun_declaracao:     tipo_especificador ID '(' params ')' escopo_stmt    {;}
 ;
-params:             params_lista                    {;}
+params:             params_lista                                        {;}
 ;
-params_lista:       params_lista ',' param          {;}
+params_lista:       params_lista ',' param                              {;}
                     | param
 ;
-param:              tipo_especificador ID           {;}
+param:              tipo_especificador ID                               {;}
 ;
-tipo_especificador: TYPEINT                 {;}
+tipo_especificador: TYPEINT                                             {;}
 ;
-escopo_stmt:        '{' declaracoes_locais statement_lista '}' {;}
+escopo_stmt:        '{' declaracoes_locais statement_lista '}'          {;}
 ;
 declaracoes_locais: /*empty*/
-                    | declaracoes_locais var_declaracao {;}
+                    | declaracoes_locais var_declaracao                 {;}
 ;
 statement_lista:    /*empty*/
-                    | statement_lista statement {;}
+                    | statement_lista statement                         {;}
 ;
-statement:          expressao_stmt {;}          
-                    | escopo_stmt {;}
-                    | iteracao_stmt {;}                    
+statement:          expressao_stmt                                      {;}
+                    | escopo_stmt                                       {;}
+                    | iteracao_stmt                                     {;}
 ;
-expressao_stmt:     expressao ';' {;}
-                    | ';'
+expressao_stmt:     expressao ';'                                       {;}
+                    | ';'                                               {;}
 ;
-iteracao_stmt:   WHILE '(' expressao ')' statement {;}
+iteracao_stmt:      WHILE '(' expressao ')' statement                   {;}
 ;
-expressao:          var '=' expressao {;}
-                    | expressao_simples {;}
+expressao:          var '=' expressao                                   {;}
+                    | expressao_simples                                 {;}
 ;
-var:                ID {;}
+var:                ID                                                  {;}
 ;
-expressao_simples:  expressao_aditiva {;}
+expressao_simples:  expressao_aditiva                                   {;}
 ;
-expressao_aditiva:  termo {;}
+expressao_aditiva:  termo                                               {;}
 ;
-termo:              fator {;}
+termo:              fator                                               {;}
 ;
-fator:              var {;}
-                    | call {;}
+fator:              var                                                 {;}
+                    | call                                              {;}
                     | INT 
-                        {
-                            emitRM("LDC",ac,$1,0,"load const");
-                        }
-                    | FLOAT 
-                        {
-                            emitRM("LDC",ac,$1,0,"load const");
-                        }
+                    { emitRM("LDC",ac,$1,0,"load const"); }
+                    | FLOAT
+                    { emitRM("LDC",ac,$1,0,"load const"); }
 ;
 call:               ESCRITA '(' args ')' 
                     {
@@ -98,16 +95,14 @@ call:               ESCRITA '(' args ')'
                         emitRO("OUT",ac,0,0,"write ac");
                     }
                     | LEITURA '(' args ')' 
-                    {
-                        printf("FEZ UMA LEITURA\n");
-                    }
-                    | ID '(' args ')' {;}
+                    { printf("FEZ UMA LEITURA\n"); }
+                    | ID '(' args ')'                                   {;}
 ;
 args:               /*empty*/
-                    | args_lista {;}
+                    | args_lista                                        {;}
 ;
-args_lista:         args_lista ',' expressao {;}
-                    | expressao {;}
+args_lista:         args_lista ',' expressao                            {;}
+                    | expressao                                         {;}
 ;
 %%
 

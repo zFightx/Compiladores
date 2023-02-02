@@ -1,5 +1,5 @@
-int main(int n){
-    int m;
+inteiro principal (inteiro n) {
+    inteiro m;
     m = 54;
-    printf(82.5); 
+    escreval(82); 
 }
