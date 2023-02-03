@@ -1,5 +1,17 @@
-inteiro principal (inteiro n) {
+inteiro principal (vazio ) {
     inteiro m;
     m = 54;
     escreval(82); 
+
+    se (10 == 2){
+        
+    } senao{
+        se(5 == 3){
+
+        }
+    }
+
+    minhaFuncao();
+
+    retorno 0;
 }

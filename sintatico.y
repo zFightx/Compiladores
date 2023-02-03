@@ -25,8 +25,22 @@ static int highEmitLoc = 0;
 %token LEITURA
 %token ESCRITA
 %token WHILE
+%token IF
+%token ELSE
+%token RETURN
+%token LESSEQUAL
+%token LESS
+%token GREATER
+%token GREATEREQUAL
+%token EQUALEQUAL
+%token NOTEQUAL
+%token ADD
+%token MINUS
+%token MULTIPLIER
+%token DIVISION
 %token COMENTARIO
 %token TYPEINT
+%token TYPEVOID
 %token <Uflutuante> FLOAT
 %token <Uinteiro> INT
 %token ID
@@ -40,19 +54,22 @@ declaracao_lista:   declaracao_lista declaracao                         {;}
 declaracao:         var_declaracao                                      {;}
                     | fun_declaracao                                    {;}
 ;
-var_declaracao:     tipo_especificador ID ';'
-                    { printf("var declaracao\n"); }
+var_declaracao:     tipo_especificador ID ';'                           {;}
+                    | tipo_especificador ID '[' INT ']'                 {;}
+;
+tipo_especificador: TYPEINT                                             {;}
+                    | TYPEVOID                                          {;}
 ;
 fun_declaracao:     tipo_especificador ID '(' params ')' escopo_stmt    {;}
 ;
 params:             params_lista                                        {;}
+                    | TYPEVOID                                          {;}
 ;
 params_lista:       params_lista ',' param                              {;}
                     | param
 ;
 param:              tipo_especificador ID                               {;}
-;
-tipo_especificador: TYPEINT                                             {;}
+                    | tipo_especificador ID '[' ']'                     {;}
 ;
 escopo_stmt:        '{' declaracoes_locais statement_lista '}'          {;}
 ;
@@ -64,25 +81,51 @@ statement_lista:    /*empty*/
 ;
 statement:          expressao_stmt                                      {;}
                     | escopo_stmt                                       {;}
+                    | selecao_stmt                                      {;}
                     | iteracao_stmt                                     {;}
+                    | retorno_stmt                                      {;}
 ;
 expressao_stmt:     expressao ';'                                       {;}
                     | ';'                                               {;}
 ;
+selecao_stmt:       IF '(' expressao ')' statement                      {;}
+                    | IF '(' expressao ')' statement ELSE statement     {;}
+;
 iteracao_stmt:      WHILE '(' expressao ')' statement                   {;}
+;
+retorno_stmt:       RETURN ';'                                          {;}
+                    | RETURN expressao ';'                              {;}
 ;
 expressao:          var '=' expressao                                   {;}
                     | expressao_simples                                 {;}
 ;
 var:                ID                                                  {;}
+                    | ID '[' expressao ']'                              {;}
 ;
-expressao_simples:  expressao_aditiva                                   {;}
+expressao_simples:  expressao_aditiva relop expressao_aditiva           {;}
+                    | expressao_aditiva                                 {;}
 ;
-expressao_aditiva:  termo                                               {;}
+relop:              LESSEQUAL                                           {;}
+                    | LESS                                              {;}
+                    | GREATER                                           {;}
+                    | GREATEREQUAL                                      {;}
+                    | EQUALEQUAL                                        {;}
+                    | NOTEQUAL                                          {;}
 ;
-termo:              fator                                               {;}
+expressao_aditiva:  expressao_aditiva addop termo                       {;}
+                    | termo                                             {;}
 ;
-fator:              var                                                 {;}
+addop:              ADD                                                 {;}
+                    | MINUS                                             {;}
+;
+termo:              termo mulop fator                                   {;}
+                    | fator                                             {;}
+;
+mulop:              MULTIPLIER                                          {;}
+                    | DIVISION                                          {;}
+;
+fator:              '(' expressao ')'                                   {;}
+                    | var                                               {;}
                     | call                                              {;}
                     | INT 
                     { emitRM("LDC",ac,$1,0,"load const"); }
