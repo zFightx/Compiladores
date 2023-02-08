@@ -78,12 +78,13 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 20 "sintatico.y"
+#line 47 "sintatico.y"
 
 	int Uinteiro;
     float Uflutuante;
+    char *Ucadeia;
 
-#line 87 "sintatico.tab.h"
+#line 88 "sintatico.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

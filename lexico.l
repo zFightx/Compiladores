@@ -47,7 +47,7 @@ OUTRO           .
 {GREATEREQUAL}  {return GREATEREQUAL;}
 {EQUALEQUAL}    {return EQUALEQUAL;}
 {NOTEQUAL}      {return NOTEQUAL;}
-{ID}            {return ID;}
+{ID}            {yylval.Ucadeia= (char *) strdup(yytext); return ID;}
 {TYPEINT}       {return TYPEINT;}
 {TYPEVOID}      {return TYPEVOID;}
 {COMENTARIO}    {return COMENTARIO;}

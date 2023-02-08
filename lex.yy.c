@@ -844,7 +844,7 @@ YY_RULE_SETUP
 case 15:
 YY_RULE_SETUP
 #line 50 "lexico.l"
-{return ID;}
+{yylval.Ucadeia= (char *) strdup(yytext); return ID;}
 	YY_BREAK
 case 16:
 /* rule 16 can match eol */

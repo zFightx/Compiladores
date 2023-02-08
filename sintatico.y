@@ -1,5 +1,6 @@
 %{
 #include <stdio.h> 
+#include <string.h>
 #include "CODE.H"
 
 extern FILE *yyin;
@@ -8,6 +9,12 @@ extern FILE *yyout;
 int yylex(void);
 int yyerror(char* s);
 
+enum tipoEnum {tipo_int, tipo_void};
+
+char* tipos[] = {
+  "tipo_int", "tipo_void"
+};
+
 /* TM location number for current instruction emission */
 static int emitLoc = 0;
 
@@ -15,11 +22,32 @@ static int emitLoc = 0;
    For use in conjunction with emitSkip,
    emitBackup, and emitRestore */
 static int highEmitLoc = 0;
+
+int tipo = 0;
+
+struct regTabSimb {
+	char *nome;                 /* nome do simbolo */
+	char *tipo;                 /* tipo_int ou tipo_cad ou nsa */
+	char *natureza;             /* variavel ou procedimento */
+	int usado;                  /* 1=sim ou 0=nao */
+	struct regTabSimb *prox;    /* ponteiro */
+};
+typedef struct regTabSimb regTabSimb;
+regTabSimb *tabSimb = (regTabSimb *)0;
+regTabSimb *colocaSimb();
+int constaTabSimb(char *nomeSimb);
+int HaWarningTabSimb();
+void declaraUsadoTabSimb();
+void imprimeTabSimb();
+int erroSemantico;
+
+
 %}
 
 %union{
 	int Uinteiro;
     float Uflutuante;
+    char *Ucadeia;
 }
 
 %token LEITURA
@@ -43,10 +71,23 @@ static int highEmitLoc = 0;
 %token TYPEVOID
 %token <Uflutuante> FLOAT
 %token <Uinteiro> INT
-%token ID
+%token <Ucadeia> ID
+
+%right "then" ELSE
+
 %%
 programa:           declaracao_lista
-                    { printf("Rodando programa\n"); }
+                    { 
+                        if (erroSemantico) {
+                            printf("\n Sintaxe ok, mas erro semantico: esqueceu de declarar alguma variavel que usou...\n");
+                        } else {
+                            printf("Sintaxe e semantica ok!\n");
+                            if (HaWarningTabSimb()) { 
+                                printf("Aviso: alguma variavel declarada e nao usada!\n");
+                                imprimeTabSimb();
+                            };
+                        }   
+                    }
 ;
 declaracao_lista:   declaracao_lista declaracao                         {;}
                     | declaracao                                        {;}
@@ -54,13 +95,27 @@ declaracao_lista:   declaracao_lista declaracao                         {;}
 declaracao:         var_declaracao                                      {;}
                     | fun_declaracao                                    {;}
 ;
-var_declaracao:     tipo_especificador ID ';'                           {;}
-                    | tipo_especificador ID '[' INT ']'                 {;}
+var_declaracao:     tipo_especificador ID ';'                           
+                    {
+                        printf("VARIAVEL CRIADA: %s, com o tipo %s\n", $2, tipos[tipo]);
+                        colocaSimb($2,tipos[tipo],"variavel",0);
+                    }
+                    | tipo_especificador ID '[' INT ']'                 
+                    {
+                        {
+                            printf("VARIAVEL CRIADA: %s, com o tipo %s\n", $2, tipos[tipo]);
+                            colocaSimb($2,tipos[tipo],"variavel",0);
+                        }
+                    }
 ;
-tipo_especificador: TYPEINT                                             {;}
-                    | TYPEVOID                                          {;}
+tipo_especificador: TYPEINT                                             {tipo=0;}
+                    | TYPEVOID                                          {tipo=1;}
 ;
-fun_declaracao:     tipo_especificador ID '(' params ')' escopo_stmt    {;}
+fun_declaracao:     tipo_especificador ID '(' params ')' escopo_stmt    
+                    {
+                        printf("FUNCAO CRIADA: %s, com o tipo %s\n", $2, tipos[tipo]);
+                        colocaSimb($2,tipos[tipo],"funcao",0);
+                    }
 ;
 params:             params_lista                                        {;}
                     | TYPEVOID                                          {;}
@@ -68,8 +123,16 @@ params:             params_lista                                        {;}
 params_lista:       params_lista ',' param                              {;}
                     | param
 ;
-param:              tipo_especificador ID                               {;}
-                    | tipo_especificador ID '[' ']'                     {;}
+param:              tipo_especificador ID                               
+                    {   
+                        printf("PARAMETRO CRIADO: %s, com o tipo %s\n", $2, tipos[tipo]);
+                        colocaSimb($2, tipos[tipo], "variavel", 0);
+                    }
+                    | tipo_especificador ID '[' ']'                     
+                    {   
+                        printf("PARAMETRO CRIADO: %s, com o tipo %s\n", $2, tipos[tipo]);
+                        colocaSimb($2, tipos[tipo], "variavel", 0);
+                    }
 ;
 escopo_stmt:        '{' declaracoes_locais statement_lista '}'          {;}
 ;
@@ -88,7 +151,7 @@ statement:          expressao_stmt                                      {;}
 expressao_stmt:     expressao ';'                                       {;}
                     | ';'                                               {;}
 ;
-selecao_stmt:       IF '(' expressao ')' statement                      {;}
+selecao_stmt:       IF '(' expressao ')' statement %prec "then"                    {;}
                     | IF '(' expressao ')' statement ELSE statement     {;}
 ;
 iteracao_stmt:      WHILE '(' expressao ')' statement                   {;}
@@ -99,8 +162,20 @@ retorno_stmt:       RETURN ';'                                          {;}
 expressao:          var '=' expressao                                   {;}
                     | expressao_simples                                 {;}
 ;
-var:                ID                                                  {;}
-                    | ID '[' expressao ']'                              {;}
+var:                ID                                                  
+                    {
+                        if (!constaTabSimb($1))
+			                erroSemantico=1;
+                        else
+                            declaraUsadoTabSimb($1);
+                    }
+                    | ID '[' expressao ']'                              
+                    {
+                        if (!constaTabSimb($1))
+			                erroSemantico=1;
+                        else
+                            declaraUsadoTabSimb($1);
+                    }
 ;
 expressao_simples:  expressao_aditiva relop expressao_aditiva           {;}
                     | expressao_aditiva                                 {;}
@@ -149,6 +224,49 @@ args_lista:         args_lista ',' expressao                            {;}
 ;
 %%
 
+regTabSimb *colocaSimb(char *nomeSimb, char *tipoSimb, char *naturezaSimb, int usadoSimb){
+	regTabSimb *ptr;
+	ptr = (regTabSimb *) malloc (sizeof(regTabSimb));
+
+	ptr->nome= (char *) malloc(strlen(nomeSimb)+1);
+	ptr->tipo= (char *) malloc(strlen(tipoSimb)+1);
+	ptr->natureza= (char *) malloc(strlen(naturezaSimb)+1);
+
+	strcpy (ptr->nome,nomeSimb);
+	strcpy (ptr->tipo,tipoSimb);
+	strcpy (ptr->natureza,naturezaSimb);
+	ptr->usado = usadoSimb;
+
+	ptr->prox= (struct regTabSimb *)tabSimb;
+	tabSimb= ptr;
+	return ptr;
+}
+int constaTabSimb(char *nomeSimb) {
+	regTabSimb *ptr;
+	for (ptr=tabSimb; ptr!=(regTabSimb *)0; ptr=(regTabSimb *)ptr->prox)
+	  if (strcmp(ptr->nome,nomeSimb)==0) return 1;
+	return 0;
+}
+int HaWarningTabSimb() {
+	regTabSimb *ptr;
+	for (ptr=tabSimb; ptr!=(regTabSimb *)0; ptr=(regTabSimb *)ptr->prox)
+	  if ((ptr->usado==0) && (strcmp(ptr->natureza,"variavel")==0)) return 1;
+	return 0;
+}
+void declaraUsadoTabSimb(char *nomeSimb) {
+	regTabSimb *ptr;
+	for (ptr=tabSimb; ptr!=(regTabSimb *)0; ptr=(regTabSimb *)ptr->prox)
+	  if (strcmp(ptr->nome,nomeSimb)==0) {
+        ptr->usado = 1; return;
+      }
+}
+void imprimeTabSimb() {
+	regTabSimb *ptr;
+	for (ptr=tabSimb; ptr!=(regTabSimb *)0; ptr=(regTabSimb *)ptr->prox)  
+        if (strcmp(ptr->natureza,"variavel")==0)
+            printf("%s usado: %d\n", ptr->nome, ptr->usado);      
+}
+
 void emitRO( char *op, int r, int s, int t, char *c)
 { fprintf(yyout,"%3d:  %5s  %d,%d,%d ",emitLoc++,op,r,s,t);
 //  if (TraceCode) fprintf(code,"\t%s",c) ;
@@ -173,13 +291,15 @@ void emitRM( char * op, int r, int d, int s, char *c)
 
 int main () 
 {
-    yyin = fopen("teste.txt", "rt");
+    yyin = fopen("flaturial.txt", "rt");
     yyout = fopen("out.tm", "wt");
 
     //emitComment("Standard prelude:");
     emitRM("LD",mp,0,ac,"load maxaddress from location 0");
     emitRM("ST",ac,0,ac,"clear location 0");
     //emitComment("End of standard prelude.");
+
+    erroSemantico=0;
 
 	yyparse ();
     

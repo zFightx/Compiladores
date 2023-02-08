@@ -1,0 +1,15 @@
+inteiro principal (inteiro argc)
+{
+    inteiro fat;
+    inteiro n;
+    n = 10;
+
+    fat = 1;
+    enquanto (n > 1) {
+        fat = fat * n;
+        n = n - 1;
+    }
+
+    escreval(fat);
+    retorno 0;
+}

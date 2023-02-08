@@ -1,17 +1,13 @@
-inteiro principal (vazio ) {
+inteiro principal (inteiro argc) {
     inteiro m;
+    argc =1;
     m = 54;
-    escreval(82); 
 
-    se (10 == 2){
-        
-    } senao{
-        se(5 == 3){
-
-        }
-    }
-
-    minhaFuncao();
+    se(10 == 2)
+        se(10==3)  
+            m=5;
+    senao 
+        m=4;
 
     retorno 0;
 }
