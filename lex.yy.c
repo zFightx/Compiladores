@@ -1,5 +1,5 @@
 
-#line 3 "lex.yy.c"
+#line 2 "lex.yy.c"
 
 #define  YY_INT_ALIGNED short int
 
@@ -493,8 +493,8 @@ char *yytext;
 #line 1 "lexico.l"
 #line 2 "lexico.l"
 #include "sintatico.tab.h"
+#line 496 "lex.yy.c"
 #line 497 "lex.yy.c"
-#line 498 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -714,7 +714,7 @@ YY_DECL
 #line 34 "lexico.l"
 
 
-#line 718 "lex.yy.c"
+#line 717 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -862,7 +862,7 @@ case 18:
 /* rule 18 can match eol */
 YY_RULE_SETUP
 #line 53 "lexico.l"
-{return COMENTARIO;}
+{;}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
@@ -900,7 +900,7 @@ YY_RULE_SETUP
 #line 61 "lexico.l"
 ECHO;
 	YY_BREAK
-#line 904 "lex.yy.c"
+#line 903 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 

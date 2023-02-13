@@ -50,7 +50,7 @@ OUTRO           .
 {ID}            {yylval.Ucadeia= (char *) strdup(yytext); return ID;}
 {TYPEINT}       {return TYPEINT;}
 {TYPEVOID}      {return TYPEVOID;}
-{COMENTARIO}    {return COMENTARIO;}
+{COMENTARIO}    {;}
 {ADD}           {return ADD;}
 {MINUS}         {return MINUS;}
 {MULTIPLIER}    {return MULTIPLIER;}

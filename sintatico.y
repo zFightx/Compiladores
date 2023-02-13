@@ -66,7 +66,6 @@ int erroSemantico;
 %token MINUS
 %token MULTIPLIER
 %token DIVISION
-%token COMENTARIO
 %token TYPEINT
 %token TYPEVOID
 %token <Uflutuante> FLOAT
@@ -89,11 +88,11 @@ programa:           declaracao_lista
                         }   
                     }
 ;
-declaracao_lista:   declaracao_lista declaracao                         {;}
-                    | declaracao                                        {;}
+declaracao_lista:   declaracao_lista declaracao                     {;}
+                    | declaracao                                    {;}
 ;
-declaracao:         var_declaracao                                      {;}
-                    | fun_declaracao                                    {;}
+declaracao:         var_declaracao                                  {;}
+                    | fun_declaracao                                {;}
 ;
 var_declaracao:     tipo_especificador ID ';'                           
                     {
@@ -108,8 +107,8 @@ var_declaracao:     tipo_especificador ID ';'
                         }
                     }
 ;
-tipo_especificador: TYPEINT                                             {tipo=0;}
-                    | TYPEVOID                                          {tipo=1;}
+tipo_especificador: TYPEINT                                 { tipo=0; }
+                    | TYPEVOID                              { tipo=1; }
 ;
 fun_declaracao:     tipo_especificador ID '(' params ')' escopo_stmt    
                     {
@@ -117,10 +116,10 @@ fun_declaracao:     tipo_especificador ID '(' params ')' escopo_stmt
                         colocaSimb($2,tipos[tipo],"funcao",0);
                     }
 ;
-params:             params_lista                                        {;}
-                    | TYPEVOID                                          {;}
+params:             params_lista                                    {;}
+                    | TYPEVOID                                      {;}
 ;
-params_lista:       params_lista ',' param                              {;}
+params_lista:       params_lista ',' param                          {;}
                     | param
 ;
 param:              tipo_especificador ID                               
@@ -134,33 +133,33 @@ param:              tipo_especificador ID
                         colocaSimb($2, tipos[tipo], "variavel", 0);
                     }
 ;
-escopo_stmt:        '{' declaracoes_locais statement_lista '}'          {;}
+escopo_stmt:        '{' declaracoes_locais statement_lista '}'      {;}
 ;
 declaracoes_locais: /*empty*/
-                    | declaracoes_locais var_declaracao                 {;}
+                    | declaracoes_locais var_declaracao             {;}
 ;
 statement_lista:    /*empty*/
-                    | statement_lista statement                         {;}
+                    | statement_lista statement                     {;}
 ;
-statement:          expressao_stmt                                      {;}
-                    | escopo_stmt                                       {;}
-                    | selecao_stmt                                      {;}
-                    | iteracao_stmt                                     {;}
-                    | retorno_stmt                                      {;}
+statement:          expressao_stmt                                  {;}
+                    | escopo_stmt                                   {;}
+                    | selecao_stmt                                  {;}
+                    | iteracao_stmt                                 {;}
+                    | retorno_stmt                                  {;}
 ;
-expressao_stmt:     expressao ';'                                       {;}
-                    | ';'                                               {;}
+expressao_stmt:     expressao ';'                                   {;}
+                    | ';'                                           {;}
 ;
-selecao_stmt:       IF '(' expressao ')' statement %prec "then"                    {;}
-                    | IF '(' expressao ')' statement ELSE statement     {;}
+selecao_stmt:       IF '(' expressao ')' statement %prec "then"     {;}
+                    | IF '(' expressao ')' statement ELSE statement {;}
 ;
-iteracao_stmt:      WHILE '(' expressao ')' statement                   {;}
+iteracao_stmt:      WHILE '(' expressao ')' statement               {;}
 ;
-retorno_stmt:       RETURN ';'                                          {;}
-                    | RETURN expressao ';'                              {;}
+retorno_stmt:       RETURN ';'                                      {;}
+                    | RETURN expressao ';'                          {;}
 ;
-expressao:          var '=' expressao                                   {;}
-                    | expressao_simples                                 {;}
+expressao:          var '=' expressao                               {;}
+                    | expressao_simples                             {;}
 ;
 var:                ID                                                  
                     {
@@ -177,31 +176,31 @@ var:                ID
                             declaraUsadoTabSimb($1);
                     }
 ;
-expressao_simples:  expressao_aditiva relop expressao_aditiva           {;}
-                    | expressao_aditiva                                 {;}
+expressao_simples:  expressao_aditiva relop expressao_aditiva       {;}
+                    | expressao_aditiva                             {;}
 ;
-relop:              LESSEQUAL                                           {;}
-                    | LESS                                              {;}
-                    | GREATER                                           {;}
-                    | GREATEREQUAL                                      {;}
-                    | EQUALEQUAL                                        {;}
-                    | NOTEQUAL                                          {;}
+relop:              LESSEQUAL                                       {;}
+                    | LESS                                          {;}
+                    | GREATER                                       {;}
+                    | GREATEREQUAL                                  {;}
+                    | EQUALEQUAL                                    {;}
+                    | NOTEQUAL                                      {;}
 ;
-expressao_aditiva:  expressao_aditiva addop termo                       {;}
-                    | termo                                             {;}
+expressao_aditiva:  expressao_aditiva addop termo                   {;}
+                    | termo                                         {;}
 ;
-addop:              ADD                                                 {;}
-                    | MINUS                                             {;}
+addop:              ADD                                             {;}
+                    | MINUS                                         {;}
 ;
-termo:              termo mulop fator                                   {;}
-                    | fator                                             {;}
+termo:              termo mulop fator                               {;}
+                    | fator                                         {;}
 ;
-mulop:              MULTIPLIER                                          {;}
-                    | DIVISION                                          {;}
+mulop:              MULTIPLIER                                      {;}
+                    | DIVISION                                      {;}
 ;
-fator:              '(' expressao ')'                                   {;}
-                    | var                                               {;}
-                    | call                                              {;}
+fator:              '(' expressao ')'                               {;}
+                    | var                                           {;}
+                    | call                                          {;}
                     | INT 
                     { emitRM("LDC",ac,$1,0,"load const"); }
                     | FLOAT
@@ -214,13 +213,13 @@ call:               ESCRITA '(' args ')'
                     }
                     | LEITURA '(' args ')' 
                     { printf("FEZ UMA LEITURA\n"); }
-                    | ID '(' args ')'                                   {;}
+                    | ID '(' args ')'                               {;}
 ;
 args:               /*empty*/
-                    | args_lista                                        {;}
+                    | args_lista                                    {;}
 ;
-args_lista:         args_lista ',' expressao                            {;}
-                    | expressao                                         {;}
+args_lista:         args_lista ',' expressao                        {;}
+                    | expressao                                     {;}
 ;
 %%
 
@@ -245,6 +244,7 @@ int constaTabSimb(char *nomeSimb) {
 	regTabSimb *ptr;
 	for (ptr=tabSimb; ptr!=(regTabSimb *)0; ptr=(regTabSimb *)ptr->prox)
 	  if (strcmp(ptr->nome,nomeSimb)==0) return 1;
+    printf("VARIAVEL NAO DECLARADA USADA: %s\n", nomeSimb);
 	return 0;
 }
 int HaWarningTabSimb() {
@@ -289,9 +289,10 @@ void emitRM( char * op, int r, int d, int s, char *c)
 //  if (highEmitLoc < emitLoc)  highEmitLoc = emitLoc ;
 } /* emitRM */
 
-int main () 
+int main (int argc, char* argv[]) 
 {
-    yyin = fopen("flaturial.txt", "rt");
+    if (argc <= 0) return 0;
+    yyin = fopen(argv[1], "rt");
     yyout = fopen("out.tm", "wt");
 
     //emitComment("Standard prelude:");

@@ -1,13 +1,27 @@
 inteiro principal (inteiro argc) {
+    inteiro x;
+    inteiro z;
+    inteiro y;
+
     inteiro m;
-    argc =1;
+    argc = 1;
     m = 54;
 
     se(10 == 2)
         se(10==3)  
             m=5;
-    senao 
+    senao
         m=4;
+    
+    argc = 7;
+    /*w = 5;
+    
+    adedonha
+    */
+    
+    x = 1;
+    y = 3;
+    z = x + y;
 
     retorno 0;
 }
