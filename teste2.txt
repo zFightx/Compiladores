@@ -1,0 +1,21 @@
+inteiro principal (inteiro argc) {
+    inteiro x;
+    inteiro z;
+    inteiro y;
+    
+    x = 6;
+    z = x;
+
+    escreval(x);
+    escreval(z);
+
+    z=5;
+    escreval(z);
+
+    y=x=z;
+    escreval(x);
+    escreval(y);
+    escreval(z);
+
+    retorno 0;
+}

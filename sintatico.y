@@ -30,6 +30,7 @@ struct regTabSimb {
 	char *tipo;                 /* tipo_int ou tipo_cad ou nsa */
 	char *natureza;             /* variavel ou procedimento */
 	int usado;                  /* 1=sim ou 0=nao */
+    int locMem;
 	struct regTabSimb *prox;    /* ponteiro */
 };
 typedef struct regTabSimb regTabSimb;
@@ -39,8 +40,13 @@ int constaTabSimb(char *nomeSimb);
 int HaWarningTabSimb();
 void declaraUsadoTabSimb();
 void imprimeTabSimb();
+int recuperaLocMemId(char []);
 int erroSemantico;
 
+int proxLocMemVar = 0;
+int locMemId = 0; /* para recuperacao na TS */
+int store = 1;
+int locMemIdStore;
 
 %}
 
@@ -97,13 +103,13 @@ declaracao:         var_declaracao                                  {;}
 var_declaracao:     tipo_especificador ID ';'                           
                     {
                         printf("VARIAVEL CRIADA: %s, com o tipo %s\n", $2, tipos[tipo]);
-                        colocaSimb($2,tipos[tipo],"variavel",0);
+                        colocaSimb($2,tipos[tipo],"variavel",0, proxLocMemVar++);
                     }
                     | tipo_especificador ID '[' INT ']'                 
                     {
                         {
                             printf("VARIAVEL CRIADA: %s, com o tipo %s\n", $2, tipos[tipo]);
-                            colocaSimb($2,tipos[tipo],"variavel",0);
+                            colocaSimb($2,tipos[tipo],"variavel",0, proxLocMemVar++);
                         }
                     }
 ;
@@ -113,7 +119,7 @@ tipo_especificador: TYPEINT                                 { tipo=0; }
 fun_declaracao:     tipo_especificador ID '(' params ')' escopo_stmt    
                     {
                         printf("FUNCAO CRIADA: %s, com o tipo %s\n", $2, tipos[tipo]);
-                        colocaSimb($2,tipos[tipo],"funcao",0);
+                        colocaSimb($2,tipos[tipo],"funcao",0, -1);
                     }
 ;
 params:             params_lista                                    {;}
@@ -125,12 +131,12 @@ params_lista:       params_lista ',' param                          {;}
 param:              tipo_especificador ID                               
                     {   
                         printf("PARAMETRO CRIADO: %s, com o tipo %s\n", $2, tipos[tipo]);
-                        colocaSimb($2, tipos[tipo], "variavel", 0);
+                        colocaSimb($2, tipos[tipo], "variavel", 0, proxLocMemVar++);
                     }
                     | tipo_especificador ID '[' ']'                     
                     {   
                         printf("PARAMETRO CRIADO: %s, com o tipo %s\n", $2, tipos[tipo]);
-                        colocaSimb($2, tipos[tipo], "variavel", 0);
+                        colocaSimb($2, tipos[tipo], "variavel", 0, proxLocMemVar++);
                     }
 ;
 escopo_stmt:        '{' declaracoes_locais statement_lista '}'      {;}
@@ -158,7 +164,11 @@ iteracao_stmt:      WHILE '(' expressao ')' statement               {;}
 retorno_stmt:       RETURN ';'                                      {;}
                     | RETURN expressao ';'                          {;}
 ;
-expressao:          var '=' expressao                               {;}
+expressao:          var {store=0;} '=' expressao                              
+                    {
+                        emitRM("ST",ac,locMemIdStore,gp,"atribuicao: armazena valor");
+                        store = 1;
+                    }
                     | expressao_simples                             {;}
 ;
 var:                ID                                                  
@@ -166,7 +176,20 @@ var:                ID
                         if (!constaTabSimb($1))
 			                erroSemantico=1;
                         else
-                            declaraUsadoTabSimb($1);
+                        {
+                            declaraUsadoTabSimb($1);                        
+                            
+                            locMemId = recuperaLocMemId($1);
+                            emitRM("LD",ac,locMemId,gp,"carrega valor de id em ac");
+                            //printf("Load para %s\n", $1);
+
+                            if(store == 1)
+                            {
+                                locMemIdStore = recuperaLocMemId($1);
+                                printf("Store para %s\n", $1);
+                            }   
+                            
+                        }
                     }
                     | ID '[' expressao ']'                              
                     {
@@ -202,9 +225,9 @@ fator:              '(' expressao ')'                               {;}
                     | var                                           {;}
                     | call                                          {;}
                     | INT 
-                    { emitRM("LDC",ac,$1,0,"load const"); }
+                    {emitRM("LDC",ac,$1,0,"load const");}
                     | FLOAT
-                    { emitRM("LDC",ac,$1,0,"load const"); }
+                    {emitRM("LDC",ac,$1,0,"load const");}
 ;
 call:               ESCRITA '(' args ')' 
                     {
@@ -223,7 +246,7 @@ args_lista:         args_lista ',' expressao                        {;}
 ;
 %%
 
-regTabSimb *colocaSimb(char *nomeSimb, char *tipoSimb, char *naturezaSimb, int usadoSimb){
+regTabSimb *colocaSimb(char *nomeSimb, char *tipoSimb, char *naturezaSimb, int usadoSimb, int loc){
 	regTabSimb *ptr;
 	ptr = (regTabSimb *) malloc (sizeof(regTabSimb));
 
@@ -235,6 +258,7 @@ regTabSimb *colocaSimb(char *nomeSimb, char *tipoSimb, char *naturezaSimb, int u
 	strcpy (ptr->tipo,tipoSimb);
 	strcpy (ptr->natureza,naturezaSimb);
 	ptr->usado = usadoSimb;
+    ptr->locMem = loc;
 
 	ptr->prox= (struct regTabSimb *)tabSimb;
 	tabSimb= ptr;
@@ -265,6 +289,14 @@ void imprimeTabSimb() {
 	for (ptr=tabSimb; ptr!=(regTabSimb *)0; ptr=(regTabSimb *)ptr->prox)  
         if (strcmp(ptr->natureza,"variavel")==0)
             printf("%s usado: %d\n", ptr->nome, ptr->usado);      
+}
+
+// recupera locacao de memoria de um id cujo nome eh passado em parametro
+int recuperaLocMemId(char *nomeSimb) {
+	regTabSimb *ptr;
+	for (ptr=tabSimb; ptr!=(regTabSimb *)0; ptr=(regTabSimb *)ptr->prox)
+	  if (strcmp(ptr->nome,nomeSimb)==0) return ptr->locMem;
+	return -1;
 }
 
 void emitRO( char *op, int r, int s, int t, char *c)

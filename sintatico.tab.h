@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.8.2.  */
+/* A Bison parser, made by GNU Bison 3.5.1.  */
 
 /* Bison interface for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2021 Free Software Foundation,
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2020 Free Software Foundation,
    Inc.
 
    This program is free software: you can redistribute it and/or modify
@@ -16,7 +16,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 /* As a special exception, you may create a larger work that contains
    part or all of the Bison parser skeleton and distribute that work
@@ -31,9 +31,8 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-/* DO NOT RELY ON FEATURES THAT ARE NOT DOCUMENTED in the manual,
-   especially those whose name start with YY_ or yy_.  They are
-   private implementation details that can be changed or removed.  */
+/* Undocumented macros, especially those whose name start with YY_,
+   are private implementation details.  Do not rely on them.  */
 
 #ifndef YY_YY_SINTATICO_TAB_H_INCLUDED
 # define YY_YY_SINTATICO_TAB_H_INCLUDED
@@ -45,51 +44,46 @@
 extern int yydebug;
 #endif
 
-/* Token kinds.  */
+/* Token type.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
   enum yytokentype
   {
-    YYEMPTY = -2,
-    YYEOF = 0,                     /* "end of file"  */
-    YYerror = 256,                 /* error  */
-    YYUNDEF = 257,                 /* "invalid token"  */
-    LEITURA = 258,                 /* LEITURA  */
-    ESCRITA = 259,                 /* ESCRITA  */
-    WHILE = 260,                   /* WHILE  */
-    IF = 261,                      /* IF  */
-    ELSE = 262,                    /* ELSE  */
-    RETURN = 263,                  /* RETURN  */
-    LESSEQUAL = 264,               /* LESSEQUAL  */
-    LESS = 265,                    /* LESS  */
-    GREATER = 266,                 /* GREATER  */
-    GREATEREQUAL = 267,            /* GREATEREQUAL  */
-    EQUALEQUAL = 268,              /* EQUALEQUAL  */
-    NOTEQUAL = 269,                /* NOTEQUAL  */
-    ADD = 270,                     /* ADD  */
-    MINUS = 271,                   /* MINUS  */
-    MULTIPLIER = 272,              /* MULTIPLIER  */
-    DIVISION = 273,                /* DIVISION  */
-    TYPEINT = 274,                 /* TYPEINT  */
-    TYPEVOID = 275,                /* TYPEVOID  */
-    FLOAT = 276,                   /* FLOAT  */
-    INT = 277,                     /* INT  */
-    ID = 278                       /* ID  */
+    LEITURA = 258,
+    ESCRITA = 259,
+    WHILE = 260,
+    IF = 261,
+    ELSE = 262,
+    RETURN = 263,
+    LESSEQUAL = 264,
+    LESS = 265,
+    GREATER = 266,
+    GREATEREQUAL = 267,
+    EQUALEQUAL = 268,
+    NOTEQUAL = 269,
+    ADD = 270,
+    MINUS = 271,
+    MULTIPLIER = 272,
+    DIVISION = 273,
+    TYPEINT = 274,
+    TYPEVOID = 275,
+    FLOAT = 276,
+    INT = 277,
+    ID = 278
   };
-  typedef enum yytokentype yytoken_kind_t;
 #endif
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 47 "sintatico.y"
+#line 53 "sintatico.y"
 
 	int Uinteiro;
     float Uflutuante;
     char *Ucadeia;
 
-#line 93 "sintatico.tab.h"
+#line 87 "sintatico.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -100,8 +94,6 @@ typedef union YYSTYPE YYSTYPE;
 
 extern YYSTYPE yylval;
 
-
 int yyparse (void);
-
 
 #endif /* !YY_YY_SINTATICO_TAB_H_INCLUDED  */
