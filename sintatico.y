@@ -48,6 +48,9 @@ int locMemId = 0; /* para recuperacao na TS */
 int store = 1;
 int locMemIdStore;
 
+int isAdd = 0;
+int isMul = 0;
+
 %}
 
 %union{
@@ -209,17 +212,38 @@ relop:              LESSEQUAL                                       {;}
                     | EQUALEQUAL                                    {;}
                     | NOTEQUAL                                      {;}
 ;
-expressao_aditiva:  expressao_aditiva addop termo                   {;}
+expressao_aditiva:  expressao_aditiva 
+                    {
+                        emitRM("LDC",ac1,0,0,"load const");
+                        emitRO("ADD",ac1,ac,ac1,"move register");
+                    } 
+                    addop termo                   
+                    {
+                        if(isAdd == 1)
+                            emitRO("ADD",ac,ac1,ac,"add a+b");
+                        else
+                            emitRO("SUB",ac,ac1,ac,"sub a-b");
+                    }
                     | termo                                         {;}
 ;
-addop:              ADD                                             {;}
-                    | MINUS                                         {;}
+addop:              ADD                                             {isAdd = 1;}
+                    | MINUS                                         {isAdd = 0;}
 ;
-termo:              termo mulop fator                               {;}
+termo:              termo 
+                    {
+                        emitRM("LDC",ac1,0,0,"load const");
+                        emitRO("ADD",ac1,ac,ac1,"move register");
+                    } mulop fator                               
+                    {
+                        if(isMul == 1)
+                            emitRO("MUL",ac,ac1,ac,"mul a*b");
+                        else
+                            emitRO("DIV",ac,ac1,ac,"div a/b");
+                    }
                     | fator                                         {;}
 ;
-mulop:              MULTIPLIER                                      {;}
-                    | DIVISION                                      {;}
+mulop:              MULTIPLIER                                      {isMul = 1;}
+                    | DIVISION                                      {isMul = 0;}
 ;
 fator:              '(' expressao ')'                               {;}
                     | var                                           {;}

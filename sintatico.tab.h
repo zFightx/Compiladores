@@ -77,7 +77,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 53 "sintatico.y"
+#line 56 "sintatico.y"
 
 	int Uinteiro;
     float Uflutuante;

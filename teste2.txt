@@ -3,7 +3,7 @@ inteiro principal (inteiro argc) {
     inteiro z;
     inteiro y;
     
-    x = 6;
+    x = (6 + 5 - 5);
     z = x;
 
     escreval(x);
@@ -12,10 +12,13 @@ inteiro principal (inteiro argc) {
     z=5;
     escreval(z);
 
-    y=x=z;
+    x = (6/6);
+    y = (3*4);
     escreval(x);
     escreval(y);
-    escreval(z);
+
+    x = 6*6/2;
+    escreval(x);
 
     retorno 0;
 }
